@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Dashboard - EstateAI{% endblock %}
+{% block title %}Executive Dashboard - EstateAI{% endblock %}
 
 {% block extra_head %}
 <!-- Chart.js CDN -->
@@ -8,45 +8,74 @@
 {% endblock %}
 
 {% block content %}
-<div class="glass-card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1.25rem; margin-bottom: 2rem;">
-    <div>
-        <h1 class="glass-card-title"><i class="fa-solid fa-chart-line logo-icon"></i> Executive Dashboard</h1>
-        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">Market intelligence, database metrics, and predictive insights.</p>
+<!-- Modern Hero Welcome Banner -->
+<div class="dashboard-hero-banner glass-card">
+    <div class="hero-glow"></div>
+    <div class="hero-content">
+        <span class="badge badge-normal" style="margin-bottom: 0.75rem; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.8px; padding: 0.4rem 0.8rem; border-radius: 50px;">
+            <i class="fa-solid fa-sparkles"></i> AI-Powered Market intelligence
+        </span>
+        <h1 class="hero-banner-title">
+            Welcome back, <span>{{ username }}</span>
+        </h1>
+        <p class="hero-banner-subtitle">
+            Manage your real estate calculations, analyze local pricing curves, and generate print-ready valuation reports in real-time.
+        </p>
     </div>
-    <a href="/predict" class="btn btn-primary">
-        <i class="fa-solid fa-calculator"></i> Run Valuation
-    </a>
+    <div class="hero-btn-container">
+        <a href="/predict" class="btn btn-primary" style="padding: 0.85rem 1.8rem; border-radius: 14px;">
+            <i class="fa-solid fa-calculator" style="font-size: 1.1rem;"></i> New Prediction
+        </a>
+    </div>
 </div>
 
-<!-- Metrics Row -->
+<!-- Premium Metrics Row -->
 <div class="dashboard-grid">
-    <div class="glass-card metrics-card">
+    <div class="glass-card metrics-card metric-indigo">
+        <div class="metrics-card-glow"></div>
         <div class="metrics-icon">
             <i class="fa-solid fa-database"></i>
         </div>
         <div class="metrics-info">
             <h3>Total Predictions</h3>
             <p id="metric-total">{{ stats.total_predictions }}</p>
+            <span class="metric-change"><i class="fa-solid fa-caret-up"></i> Platform Log</span>
         </div>
     </div>
     
-    <div class="glass-card metrics-card">
+    <div class="glass-card metrics-card metric-teal">
+        <div class="metrics-card-glow"></div>
         <div class="metrics-icon">
             <i class="fa-solid fa-tags"></i>
         </div>
         <div class="metrics-info">
             <h3>Average Valuation</h3>
-            <p id="metric-avg">${{ "{:,.2f}".format(stats.avg_price) if stats.avg_price else "0.00" }}</p>
+            <p id="metric-avg">${{ "{:,.0f}".format(stats.avg_price) if stats.avg_price else "0" }}</p>
+            <span class="metric-change"><i class="fa-solid fa-caret-up"></i> Market Mean</span>
         </div>
     </div>
     
-    <div class="glass-card metrics-card">
+    <div class="glass-card metrics-card metric-rose">
+        <div class="metrics-card-glow"></div>
         <div class="metrics-icon">
             <i class="fa-solid fa-gem"></i>
         </div>
         <div class="metrics-info">
             <h3>Premium Ratio</h3>
             <p id="metric-premium">{{ "{:.1f}%".format(stats.premium_percentage) if stats.premium_percentage else "0.0%" }}</p>
+            <span class="metric-change"><i class="fa-solid fa-caret-up"></i> High Tier</span>
+        </div>
+    </div>
+
+    <div class="glass-card metrics-card metric-amber">
+        <div class="metrics-card-glow"></div>
+        <div class="metrics-icon">
+            <i class="fa-solid fa-star"></i>
+        </div>
+        <div class="metrics-info">
+            <h3>Feedback Rating</h3>
+            <p id="metric-feedback">{{ stats.feedback_avg }} ★</p>
+            <span class="metric-change">({{ stats.feedback_count }} reviews)</span>
         </div>
     </div>
 </div>
@@ -54,81 +83,133 @@
 <!-- Charts Grid -->
 <div class="charts-grid">
     <div class="glass-card chart-card">
-        <h3 style="font-family: var(--font-heading); margin-bottom: 1rem; font-size: 1.1rem;"><i class="fa-solid fa-chart-simple" style="color: var(--color-primary);"></i> Average Price by Location Type</h3>
-        <div class="chart-wrapper">
+        <div class="chart-header">
+            <h3><i class="fa-solid fa-chart-simple" style="color: var(--color-primary);"></i> Average Price by Location Type</h3>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Real-time metrics</span>
+        </div>
+        <div class="chart-wrapper" style="margin-top: 1.25rem;">
             <canvas id="locationPriceChart"></canvas>
         </div>
     </div>
     
     <div class="glass-card chart-card">
-        <h3 style="font-family: var(--font-heading); margin-bottom: 1rem; font-size: 1.1rem;"><i class="fa-solid fa-chart-pie" style="color: var(--color-accent);"></i> Predictions by Neighborhood</h3>
-        <div class="chart-wrapper">
+        <div class="chart-header">
+            <h3><i class="fa-solid fa-chart-pie" style="color: var(--color-accent);"></i> Neighborhood Splits</h3>
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Sample sizes</span>
+        </div>
+        <div class="chart-wrapper" style="margin-top: 1.25rem;">
             <canvas id="locationDistributionChart"></canvas>
         </div>
     </div>
 </div>
 
-<!-- Recent Predictions Table -->
-<div class="glass-card">
-    <div class="glass-card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700;">Recent Predictions</h3>
-        <a href="/history" style="font-size: 0.85rem; color: var(--color-primary); font-weight: 600;">View All History <i class="fa-solid fa-arrow-right"></i></a>
+<!-- Recent Predictions & Feedback Split Grid -->
+<div class="charts-grid">
+    <!-- Predictions Table Card / Recent Activity -->
+    <div class="glass-card">
+        <div class="glass-card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700;"><i class="fa-solid fa-clock-history" style="color: var(--color-primary); margin-right: 0.5rem;"></i> Recent Prediction Logs</h3>
+            <a href="/history" class="activity-link">View History <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+
+        {% if recent_predictions %}
+            <div class="table-container">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Location</th>
+                            <th>Square Feet</th>
+                            <th>Beds/Baths</th>
+                            <th>Year</th>
+                            <th>Valuation</th>
+                            <th>Tier</th>
+                            <th>Report</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in recent_predictions %}
+                            <tr class="activity-row">
+                                <td>
+                                    <span style="display: flex; align-items: center; gap: 0.5rem;">
+                                        <i class="fa-solid fa-map-pin" style="color: var(--color-accent); font-size: 0.85rem;"></i>
+                                        <strong>{{ item.Location }}</strong>
+                                    </span>
+                                </td>
+                                <td>{{ "{:,}".format(item.SquareFootage) }} sqft</td>
+                                <td>{{ item.Bedrooms }} / {{ item.Bathrooms }}</td>
+                                <td>{{ item.YearBuilt }}</td>
+                                <td style="font-family: var(--font-heading); font-weight: 700; color: var(--color-accent);">
+                                    ${{ "{:,.0f}".format(item.predicted_price) }}
+                                </td>
+                                <td>
+                                    {% if item.is_expensive == 1 %}
+                                        <span class="badge badge-expensive" style="padding: 0.25rem 0.6rem; font-size: 0.7rem;">Premium</span>
+                                    {% else %}
+                                        <span class="badge badge-normal" style="padding: 0.25rem 0.6rem; font-size: 0.7rem;">Standard</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="/prediction/{{ item._id or item.id }}/pdf" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.78rem; border-radius: var(--border-radius-sm);" target="_blank">
+                                        <i class="fa-solid fa-file-pdf" style="color: var(--color-danger);"></i> PDF
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state-card" style="text-align: center; padding: 3rem 1.5rem; color: var(--text-secondary);">
+                <div class="empty-state-icon" style="font-size: 2.8rem; color: var(--color-primary); opacity: 0.5; margin-bottom: 1rem;">
+                    <i class="fa-solid fa-folder-open"></i>
+                </div>
+                <h4 style="font-family: var(--font-heading); font-size: 1.15rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.4rem;">No Valuations Logged</h4>
+                <p style="font-size: 0.88rem; max-width: 300px; margin: 0 auto 1.25rem; line-height: 1.5;">You haven't run any property price estimations yet. Start analyzing property metrics now.</p>
+                <a href="/predict" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem; border-radius: 10px;">
+                    <i class="fa-solid fa-calculator"></i> Run First Prediction
+                </a>
+            </div>
+        {% endif %}
     </div>
 
-    {% if recent_predictions %}
-        <div class="table-container">
-            <table class="custom-table">
-                <thead>
-                    <tr>
-                        <th>Location</th>
-                        <th>Square Feet</th>
-                        <th>Beds/Baths</th>
-                        <th>Year</th>
-                        <th>Garage</th>
-                        <th>Predicted Price</th>
-                        <th>Tier</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in recent_predictions %}
-                        <tr>
-                            <td><strong>{{ item.Location }}</strong></td>
-                            <td>{{ "{:,}".format(item.SquareFootage) }} sqft</td>
-                            <td>{{ item.Bedrooms }} / {{ item.Bathrooms }}</td>
-                            <td>{{ item.YearBuilt }}</td>
-                            <td>
-                                {% if item.HasGarage == 1 %}
-                                    <span style="color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> Yes</span>
-                                {% else %}
-                                    <span style="color: var(--text-muted);"><i class="fa-solid fa-circle-xmark"></i> No</span>
-                                {% endif %}
-                            </td>
-                            <td style="font-family: var(--font-heading); font-weight: 700; color: var(--color-accent);">
-                                ${{ "{:,.2f}".format(item.predicted_price) }}
-                            </td>
-                            <td>
-                                {% if item.is_expensive == 1 %}
-                                    <span class="badge badge-expensive" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Premium</span>
-                                {% else %}
-                                    <span class="badge badge-normal" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Standard</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <a href="/prediction/{{ item._id or item.id }}/pdf" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: var(--border-radius-sm);">
-                                    <i class="fa-solid fa-file-pdf" style="color: var(--color-danger);"></i> PDF
-                                </a>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <!-- Latest Feedback Preview Card -->
+    <div class="glass-card" style="display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden;">
+        <div class="metrics-card-glow" style="background: radial-gradient(circle, rgba(245, 158, 11, 0.04) 0%, rgba(0,0,0,0) 70%);"></div>
+        <div>
+            <div class="glass-card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700;"><i class="fa-solid fa-comment-dots" style="color: var(--color-warning); margin-right: 0.5rem;"></i> Latest Platform Feedback</h3>
+            </div>
+            {% if latest_fb %}
+                <div style="padding: 0.5rem 0; position: relative; z-index: 2;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <span style="font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-circle-user" style="color: var(--text-muted); font-size: 1.2rem;"></i>
+                            {{ latest_fb.first_name }}
+                        </span>
+                        <span style="color: var(--color-warning); font-size: 0.82rem; background: rgba(245, 158, 11, 0.08); padding: 0.25rem 0.5rem; border-radius: 6px;">
+                            {% for i in range(latest_fb.rating) %}
+                                <i class="fa-solid fa-star"></i>
+                            {% endfor %}
+                            {% for i in range(5 - latest_fb.rating) %}
+                                <i class="fa-regular fa-star"></i>
+                            {% endfor %}
+                        </span>
+                    </div>
+                    <blockquote style="font-style: italic; color: var(--text-secondary); font-size: 0.92rem; line-height: 1.55; margin-bottom: 1rem; border-left: 2px solid var(--color-warning); padding-left: 0.75rem;">
+                        "{{ latest_fb.message | truncate(150) }}"
+                    </blockquote>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block;"><i class="fa-regular fa-clock"></i> Submitted: {{ latest_fb.timestamp.split(' ')[0] }}</span>
+                </div>
+            {% else %}
+                <div style="text-align: center; color: var(--text-muted); padding: 3rem 0; font-size: 0.9rem;">
+                    No reviews submitted yet.
+                </div>
+            {% endif %}
         </div>
-    {% else %}
-        <div style="text-align: center; padding: 2rem; color: var(--text-secondary); font-size: 0.9rem;">
-            No predictions logged yet. Run a valuation above to see them here!
-        </div>
-    {% endif %}
+        <a href="/feedback" class="btn btn-outline btn-block" style="margin-top: 1.5rem; z-index: 2;">
+            <i class="fa-solid fa-pen-to-square"></i> Leave a Review
+        </a>
+    </div>
 </div>
 {% endblock %}
 

@@ -5,6 +5,9 @@
 document.addEventListener("DOMContentLoaded", () => {
     initTheme();
     initToasts();
+    initCarousel();
+    initStarLabels();
+    initPDFLinks();
 });
 
 /**
@@ -86,4 +89,150 @@ function initToasts() {
             }, 500);
         }, 5000);
     });
+}
+
+/**
+ * Landing Page Reviews Carousel
+ */
+function initCarousel() {
+    const track = document.getElementById("carousel-track");
+    const slides = document.querySelectorAll(".carousel-slide");
+    const dotsContainer = document.getElementById("carousel-dots");
+    if (!track || slides.length === 0) return;
+
+    let currentIndex = 0;
+    const totalSlides = slides.length;
+    let autoPlayInterval;
+
+    // Create dot indicators
+    slides.forEach((_, index) => {
+        const dot = document.createElement("div");
+        dot.classList.add("carousel-dot");
+        if (index === 0) dot.classList.add("active");
+        dot.addEventListener("click", () => {
+            goToSlide(index);
+            resetAutoPlay();
+        });
+        dotsContainer.appendChild(dot);
+    });
+
+    const dots = document.querySelectorAll(".carousel-dot");
+
+    function goToSlide(index) {
+        currentIndex = index;
+        track.style.transform = `translateX(-${currentIndex * 100}%)`;
+        
+        // Update dots
+        dots.forEach((dot, idx) => {
+            if (idx === currentIndex) {
+                dot.classList.add("active");
+            } else {
+                dot.classList.remove("active");
+            }
+        });
+    }
+
+    function nextSlide() {
+        let nextIndex = (currentIndex + 1) % totalSlides;
+        goToSlide(nextIndex);
+    }
+
+    function startAutoPlay() {
+        autoPlayInterval = setInterval(nextSlide, 5000); // Shift slide every 5 seconds
+    }
+
+    function resetAutoPlay() {
+        clearInterval(autoPlayInterval);
+        startAutoPlay();
+    }
+
+    // Start AutoPlay
+    startAutoPlay();
+}
+
+/**
+ * Custom text indicator for Star selection (Optional enhancement)
+ */
+function initStarLabels() {
+    const starsInputs = document.querySelectorAll(".star-rating-selector input");
+    const starValText = document.getElementById("star-val-text");
+    if (starsInputs.length === 0 || !starValText) return;
+
+    const ratingsMap = {
+        "1": "1 Star - Poor experience",
+        "2": "2 Stars - Disappointing",
+        "3": "3 Stars - Average platform",
+        "4": "4 Stars - Good and clean UI",
+        "5": "5 Stars - Amazing prediction platform!"
+    };
+
+    starsInputs.forEach((input) => {
+        input.addEventListener("change", (e) => {
+            const val = e.target.value;
+            starValText.innerText = ratingsMap[val] || "";
+            starValText.style.color = "var(--color-warning)";
+        });
+    });
+}
+
+/**
+ * Prevent duplicate PDF exports and show loading state
+ */
+function initPDFLinks() {
+    document.querySelectorAll('a[href*="/pdf"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (this.classList.contains('disabled')) {
+                e.preventDefault();
+                return;
+            }
+            this.classList.add('disabled');
+            const originalHTML = this.innerHTML;
+            this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+            
+            // Re-enable after 4 seconds
+            setTimeout(() => {
+                this.classList.remove('disabled');
+                this.innerHTML = originalHTML;
+            }, 4000);
+        });
+    });
+}
+
+/**
+ * Global dynamic toast notification alert
+ */
+function showToast(message, category = "info") {
+    let container = document.querySelector(".toast-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.className = "toast-container";
+        document.body.appendChild(container);
+    }
+
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${category}`;
+    
+    let iconClass = "fa-circle-info";
+    if (category === "success") iconClass = "fa-circle-check";
+    else if (category === "danger") iconClass = "fa-circle-exclamation";
+
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fa-solid ${iconClass} toast-icon"></i>
+            <span class="toast-message">${message}</span>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        toast.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(100px)";
+        setTimeout(() => {
+            toast.remove();
+        }, 500);
+    }, 5000);
 }

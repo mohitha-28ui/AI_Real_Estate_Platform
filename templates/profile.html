@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Profile & Settings - EstateAI{% endblock %}
+{% block content %}
+<div class="profile-container">
+    <div class="profile-grid">
+        <!-- Profile info card -->
+        <div class="card profile-info-card glass-card animate-fade-in">
+            <div class="profile-avatar-large">
+                {{ user_email[0].upper() }}
+            </div>
+            <h2>Welcome, {{ username }} 👋</h2>
+            <p class="profile-email"><i class="fa-solid fa-envelope"></i> {{ user_email }}</p>
+            <div class="profile-meta-row">
+                <span class="meta-item"><i class="fa-solid fa-calendar"></i> Joined: {{ join_date }}</span>
+                <span class="meta-item"><i class="fa-solid fa-shield-halved"></i> Role: User</span>
+            </div>
+        </div>
+
+        <!-- Usage statistics card -->
+        <div class="card profile-stats-card glass-card animate-fade-in">
+            <h3><i class="fa-solid fa-chart-simple"></i> Platform Activity</h3>
+            <div class="stats-display">
+                <div class="stat-large">
+                    <span class="stat-number">{{ pred_count }}</span>
+                    <span class="stat-label">Total Predictions Run</span>
+                </div>
+            </div>
+            <p class="stats-desc">Every run uses our state-of-the-art Random Forest Regressor to provide instant real-estate valuation insights.</p>
+        </div>
+
+        <!-- Settings/Change Password form card -->
+        <div id="settings" class="card profile-settings-card glass-card animate-fade-in">
+            <h3><i class="fa-solid fa-lock"></i> Security Settings</h3>
+            <p class="section-subtitle">Update your account password regularly to maintain security.</p>
+            
+            <form action="{{ url_for('profile') }}" method="POST" class="settings-form">
+                <div class="form-group">
+                    <label for="old_password">Current Password</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-key input-icon"></i>
+                        <input type="password" id="old_password" name="old_password" required placeholder="Enter current password">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="new_password">New Password</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock input-icon"></i>
+                        <input type="password" id="new_password" name="new_password" required placeholder="Enter new password">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm_password">Confirm New Password</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-circle-check input-icon"></i>
+                        <input type="password" id="confirm_password" name="confirm_password" required placeholder="Confirm new password">
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fa-solid fa-save"></i> Update Password
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

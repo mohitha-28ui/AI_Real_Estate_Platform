@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Community Feedback - EstateAI{% endblock %}
+
+{% block content %}
+<div class="glass-card-header" style="margin-bottom: 2rem;">
+    <h1 class="glass-card-title"><i class="fa-solid fa-comments logo-icon"></i> Community Reviews & Feedback</h1>
+    <p style="color: var(--text-secondary); margin-top: 0.25rem;">Rate your experience and read reviews from other verified partners.</p>
+</div>
+
+<div class="predict-layout">
+    <!-- Feedback Form Column (Left) -->
+    <div class="glass-card" style="position: relative;">
+        <!-- Success Overlay (Hidden by default, triggered on AJAX success) -->
+        <div class="success-overlay" id="success-overlay" style="display: none;">
+            <div class="success-checkmark">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h2 style="font-family: var(--font-heading); font-weight: 800; margin-bottom: 0.5rem; color: var(--text-primary);">Submission Received!</h2>
+            <p style="color: var(--text-secondary); font-size: 1rem; margin-bottom: 1.5rem;">Thank you for helping improve EstateAI!</p>
+            <button class="btn btn-outline" onclick="resetFeedbackForm()">Write Another Review</button>
+        </div>
+
+        <form id="feedback-form">
+            <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">Leave a Review</h3>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">Your feedback is directly analyzed to improve the pricing estimators and reports.</p>
+
+            <div class="form-group">
+                <label class="form-label">Select Star Rating</label>
+                <!-- 5 Star Selection Container -->
+                <div class="star-rating-selector">
+                    <input type="radio" id="star5" name="rating" value="5" required />
+                    <label for="star5" title="5 Stars"><i class="fa-solid fa-star"></i></label>
+                    
+                    <input type="radio" id="star4" name="rating" value="4" />
+                    <label for="star4" title="4 Stars"><i class="fa-solid fa-star"></i></label>
+                    
+                    <input type="radio" id="star3" name="rating" value="3" />
+                    <label for="star3" title="3 Stars"><i class="fa-solid fa-star"></i></label>
+                    
+                    <input type="radio" id="star2" name="rating" value="2" />
+                    <label for="star2" title="2 Stars"><i class="fa-solid fa-star"></i></label>
+                    
+                    <input type="radio" id="star1" name="rating" value="1" />
+                    <label for="star1" title="1 Star"><i class="fa-solid fa-star"></i></label>
+                </div>
+                <div id="star-val-text" style="font-size: 0.85rem; font-weight: 600; min-height: 20px;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="message" class="form-label">Review Details</label>
+                <textarea id="message" name="message" class="form-control" rows="5" placeholder="Share your experience using the prediction engines, PDF exports, or dashboard..." required minlength="5" style="resize: none;"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">
+                <i class="fa-solid fa-paper-plane"></i> Submit Feedback
+            </button>
+        </form>
+    </div>
+
+    <!-- Live Community Reviews Feed (Right) -->
+    <div class="glass-card">
+        <h3 style="font-family: var(--font-heading); font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem;">Recent Community Reviews</h3>
+        
+        <div class="reviews-feed" id="reviews-feed">
+            {% if reviews %}
+                {% for item in reviews %}
+                    <div class="review-card">
+                        <div class="review-card-header">
+                            <div>
+                                <span class="reviewer-name">{{ item.first_name }}</span>
+                                <span class="review-date" style="margin-left: 0.5rem;">• {{ item.timestamp.split(' ')[0] }}</span>
+                            </div>
+                            <div class="review-stars">
+                                {% for i in range(item.rating) %}
+                                    <i class="fa-solid fa-star"></i>
+                                {% endfor %}
+                                {% for i in range(5 - item.rating) %}
+                                    <i class="fa-regular fa-star"></i>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <p class="review-text">"{{ item.message }}"</p>
+                        
+                        <!-- Badges pill container -->
+                        <div class="badge-container">
+                            {% for badge in item.badges %}
+                                <span class="badge-pill {% if badge == 'Verified User' %}badge-verified{% elif badge == 'Top Reviewer' %}badge-top-reviewer{% else %}badge-early-adopter{% endif %}">
+                                    <i class="fa-solid {% if badge == 'Verified User' %}fa-circle-check{% elif badge == 'Top Reviewer' %}fa-award{% else %}fa-rocket{% endif %}"></i> {{ badge }}
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
+                    <i class="fa-regular fa-comments" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                    <p>No reviews have been written yet. Be the first to leave a review!</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('feedback-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Read selected rating
+    const ratingEl = document.querySelector('input[name="rating"]:checked');
+    if (!ratingEl) {
+        showToast("Please select a star rating first!", "danger");
+        return;
+    }
+    
+    const rating = ratingEl.value;
+    const message = document.getElementById('message').value;
+
+    fetch('/feedback', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ rating: rating, message: message })
+    })
+    .then(response => response.json())
+    .then(res => {
+        if (res.error) {
+            showToast("Error: " + res.error, "danger");
+            return;
+        }
+
+        // Show animated success overlay
+        document.getElementById('success-overlay').style.display = 'flex';
+        showToast("Feedback submitted successfully!", "success");
+    })
+    .catch(err => {
+        console.error("Submission failed:", err);
+        showToast("Could not connect to the server. Please verify Flask is running.", "danger");
+    });
+});
+
+function resetFeedbackForm() {
+    // Reset form and text
+    document.getElementById('feedback-form').reset();
+    document.getElementById('star-val-text').innerText = "";
+    
+    // Hide overlay
+    document.getElementById('success-overlay').style.display = 'none';
+    
+    // Refresh page to populate the community list with the new review
+    window.location.reload();
+}
+</script>
+{% endblock %}

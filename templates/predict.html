@@ -127,10 +127,18 @@
                 </div>
             </div>
 
-            <a id="btn-download-pdf" href="#" class="btn btn-accent btn-block">
+            <a id="btn-download-pdf" href="#" class="btn btn-accent btn-block" target="_blank">
                 <i class="fa-solid fa-file-pdf"></i> Download PDF Valuation Report
             </a>
         </div>
+    </div>
+</div>
+
+<!-- Loading Overlay Modal -->
+<div id="loading-overlay" class="loading-overlay" style="display: none;">
+    <div class="loader-content">
+        <div class="pulse-spinner"></div>
+        <p class="loader-text">AI is analyzing property...</p>
     </div>
 </div>
 {% endblock %}
@@ -146,6 +154,16 @@ document.getElementById('predict-form').addEventListener('submit', function(e) {
         data[key] = value;
     });
 
+    // Disable submit button and show loading text
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    const originalBtnHTML = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing property data...';
+
+    // Show loading overlay
+    const overlay = document.getElementById('loading-overlay');
+    overlay.style.display = 'flex';
+
     // Send prediction request
     fetch('/predict', {
         method: 'POST',
@@ -156,8 +174,15 @@ document.getElementById('predict-form').addEventListener('submit', function(e) {
     })
     .then(response => response.json())
     .then(res => {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHTML;
+        
+        // Hide overlay
+        overlay.style.display = 'none';
+
         if (res.error) {
-            alert("Error: " + res.error);
+            showToast(res.error, "danger");
             return;
         }
 
@@ -185,10 +210,17 @@ document.getElementById('predict-form').addEventListener('submit', function(e) {
 
         // Update PDF button href
         document.getElementById('btn-download-pdf').href = `/prediction/${res.prediction_id}/pdf`;
+        showToast("Valuation calculated successfully!", "success");
     })
     .catch(err => {
+        // Reset button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHTML;
+        
+        // Hide overlay
+        overlay.style.display = 'none';
         console.error("Error during prediction:", err);
-        alert("An error occurred. Make sure models are trained and Flask is running.");
+        showToast("An error occurred. Make sure models are trained and Flask is running.", "danger");
     });
 });
 </script>

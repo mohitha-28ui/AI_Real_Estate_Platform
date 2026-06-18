@@ -19,27 +19,13 @@
     <div class="bg-glow-1"></div>
     <div class="bg-glow-2"></div>
 
-    <!-- Navigation Header -->
+    <!-- Top Branding Header (No Nav Menu Links) -->
     <header class="navbar-container">
         <div class="navbar-wrapper">
             <a href="/" class="nav-brand">
                 <i class="fa-solid fa-hotel logo-icon"></i>
                 <span>Estate<span class="brand-accent">AI</span></span>
             </a>
-            
-            <nav class="nav-menu">
-                {% if session.get('user') %}
-                    <a href="/dashboard" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
-                        <i class="fa-solid fa-chart-line"></i> Dashboard
-                    </a>
-                    <a href="/predict" class="nav-link {% if active_page == 'predict' %}active{% endif %}">
-                        <i class="fa-solid fa-calculator"></i> Predict Price
-                    </a>
-                    <a href="/history" class="nav-link {% if active_page == 'history' %}active{% endif %}">
-                        <i class="fa-solid fa-history"></i> History
-                    </a>
-                {% endif %}
-            </nav>
 
             <div class="nav-actions">
                 <!-- Theme Toggler -->
@@ -50,11 +36,21 @@
 
                 {% if session.get('user') %}
                     <div class="user-profile">
-                        <div class="user-avatar">
-                            <i class="fa-solid fa-user"></i>
+                        <div class="user-avatar" title="Welcome, {{ username }} 👋">
+                            {{ username[0] }}
                         </div>
                         <div class="user-info-dropdown">
-                            <span class="user-email">{{ session['user'] }}</span>
+                            <div class="dropdown-user-header">
+                                <span class="dropdown-user-name">👤 {{ username }}</span>
+                                <span class="dropdown-user-email">{{ session['user'] }}</span>
+                            </div>
+                            <hr class="dropdown-divider">
+                            <a href="/profile" class="dropdown-item">
+                                <i class="fa-solid fa-user"></i> Profile
+                            </a>
+                            <a href="/profile#settings" class="dropdown-item">
+                                <i class="fa-solid fa-gear"></i> Settings
+                            </a>
                             <hr class="dropdown-divider">
                             <a href="/logout" class="dropdown-item logout-link">
                                 <i class="fa-solid fa-right-from-bracket"></i> Log Out
@@ -94,6 +90,40 @@
             {% block content %}{% endblock %}
         </div>
     </main>
+
+    <!-- Mobile-Style Floating Bottom Navigation (Only for logged-in sessions) -->
+    {% if session.get('user') %}
+    <nav class="bottom-nav-container">
+        <div class="bottom-nav-wrapper">
+            <a href="/dashboard" class="bottom-nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="/predict" class="bottom-nav-item {% if active_page == 'predict' %}active{% endif %}">
+                <i class="fa-solid fa-calculator"></i>
+                <span>Predict</span>
+            </a>
+            
+            <a href="/history" class="bottom-nav-item {% if active_page == 'history' %}active{% endif %}">
+                <i class="fa-solid fa-history"></i>
+                <span>History</span>
+            </a>
+            
+            <a href="/feedback" class="bottom-nav-item {% if active_page == 'feedback' %}active{% endif %}">
+                <i class="fa-solid fa-comments"></i>
+                <span>Feedback</span>
+            </a>
+            
+            {% if session.get('user') == 'admin@estateai.com' %}
+                <a href="/admin" class="bottom-nav-item {% if active_page == 'admin' %}active{% endif %}">
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>Admin</span>
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+    {% endif %}
 
     <!-- Footer -->
     <footer class="footer-container">

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Page Not Found - EstateAI{% endblock %}
+{% block content %}
+<div class="error-page-container animate-fade-in">
+    <div class="error-card glass-card">
+        <div class="error-code">404</div>
+        <div class="error-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+        <h2>Lost in Translation</h2>
+        <p class="error-message">The property page or analytics route you are looking for does not exist or has been relocated.</p>
+        <div class="error-actions">
+            <a href="/dashboard" class="btn btn-primary">
+                <i class="fa-solid fa-house-laptop"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

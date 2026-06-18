@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Server Error - EstateAI{% endblock %}
+{% block content %}
+<div class="error-page-container animate-fade-in">
+    <div class="error-card glass-card">
+        <div class="error-code">500</div>
+        <div class="error-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h2>Server Error</h2>
+        <p class="error-message">Our AI predictive engines or database connections ran into an unexpected anomaly. Rest assured, our systems engineers are inspecting the issue.</p>
+        <div class="error-actions">
+            <a href="/dashboard" class="btn btn-primary">
+                <i class="fa-solid fa-house-laptop"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

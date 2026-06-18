@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}EstateAI - AI-Powered Real Estate Analytics & Valuation{% endblock %}
+
+{% block content %}
+<!-- Hero Header Section -->
+<section class="hero-section">
+    <h1 class="hero-title">AI-Powered Real Estate Valuation & Market Analytics</h1>
+    <p class="hero-subtitle">Make data-driven property investments with state-of-the-art Random Forest price estimation, classification, and print-ready PDF valuation logs.</p>
+    
+    <div class="hero-buttons">
+        {% if session.get('user') %}
+            <a href="/dashboard" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-chart-pie"></i> Access Dashboard
+            </a>
+            <a href="/predict" class="btn btn-outline btn-lg">
+                <i class="fa-solid fa-calculator"></i> Run Valuation
+            </a>
+        {% else %}
+            <a href="/register" class="btn btn-primary btn-lg">
+                <i class="fa-solid fa-user-plus"></i> Get Started Free
+            </a>
+            <a href="/login" class="btn btn-outline btn-lg">
+                <i class="fa-solid fa-right-to-bracket"></i> Partner Login
+            </a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Stats Grid -->
+<div class="dashboard-grid" style="margin-top: 2rem;">
+    <div class="glass-card metrics-card">
+        <div class="metrics-icon" style="background: rgba(99, 102, 241, 0.1); color: var(--color-primary);">
+            <i class="fa-solid fa-star"></i>
+        </div>
+        <div class="metrics-info">
+            <h3>Average Rating</h3>
+            <p>{{ feedback_stats.avg_rating }} / 5.0</p>
+        </div>
+    </div>
+    
+    <div class="glass-card metrics-card">
+        <div class="metrics-icon" style="background: rgba(20, 184, 166, 0.1); color: var(--color-accent);">
+            <i class="fa-solid fa-comments"></i>
+        </div>
+        <div class="metrics-info">
+            <h3>Verified Feedback</h3>
+            <p>{{ feedback_stats.count }} Reviews</p>
+        </div>
+    </div>
+    
+    <div class="glass-card metrics-card">
+        <div class="metrics-icon" style="background: rgba(245, 158, 11, 0.1); color: var(--color-warning);">
+            <i class="fa-solid fa-bullseye"></i>
+        </div>
+        <div class="metrics-info">
+            <h3>Model Accuracy</h3>
+            <p>97.6% R²</p>
+        </div>
+    </div>
+</div>
+
+<!-- Social Proof / What Our Users Say -->
+<section class="social-proof-section">
+    <h2>What Our Users Say</h2>
+    <p>Real feedback from homeowners, property brokers, and real estate professionals leveraging EstateAI.</p>
+
+    <div class="carousel-container glass-card">
+        <div class="carousel-track" id="carousel-track">
+            {% if featured_reviews %}
+                {% for review in featured_reviews %}
+                    <div class="carousel-slide">
+                        <div style="display: flex; flex-direction: column; align-items: center; text-align: center;">
+                            <div class="review-stars" style="font-size: 1.4rem; margin-bottom: 0.8rem;">
+                                {% for i in range(review.rating) %}
+                                    <i class="fa-solid fa-star"></i>
+                                {% endfor %}
+                                {% for i in range(5 - review.rating) %}
+                                    <i class="fa-regular fa-star"></i>
+                                {% endfor %}
+                            </div>
+                            <blockquote style="font-family: var(--font-heading); font-size: 1.15rem; font-style: italic; font-weight: 500; color: var(--text-primary); margin-bottom: 1.25rem; max-width: 80%; line-height: 1.5;">
+                                "{{ review.message }}"
+                            </blockquote>
+                            
+                            <h4 class="reviewer-name">{{ review.first_name }}</h4>
+                            <span class="review-date" style="margin-top: 0.2rem; display: block;">Submitted: {{ review.timestamp.split(' ')[0] }}</span>
+                            
+                            <!-- Badges -->
+                            <div class="badge-container" style="justify-content: center; margin-top: 0.8rem;">
+                                {% for badge in review.badges %}
+                                    <span class="badge-pill {% if badge == 'Verified User' %}badge-verified{% elif badge == 'Top Reviewer' %}badge-top-reviewer{% else %}badge-early-adopter{% endif %}">
+                                        <i class="fa-solid {% if badge == 'Verified User' %}fa-circle-check{% elif badge == 'Top Reviewer' %}fa-award{% else %}fa-rocket{% endif %}"></i> {{ badge }}
+                                    </span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="carousel-slide">
+                    <p style="color: var(--text-secondary);">No featured reviews to display. Log in to write a review!</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Dot Navigation -->
+        <div class="carousel-dots" id="carousel-dots"></div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section style="text-align: center; margin: 5rem 0 2rem;">
+    <div class="glass-card" style="padding: 3rem; max-width: 900px; margin: 0 auto; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(20, 184, 166, 0.05)); border-color: rgba(99, 102, 241, 0.15);">
+        <h2 style="font-family: var(--font-heading); font-size: 2rem; margin-bottom: 1rem;">Ready to Value Your First Property?</h2>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 2rem; line-height: 1.6;">Register now to access unlimited Random Forest estimation runs, pricing metrics breakdowns, and high-end PDF downloads.</p>
+        {% if session.get('user') %}
+            <a href="/predict" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> Run prediction now</a>
+        {% else %}
+            <a href="/register" class="btn btn-primary"><i class="fa-solid fa-arrow-right"></i> Sign Up Instantly</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
