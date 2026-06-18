@@ -50,13 +50,14 @@ Model:
 - SQLite
 
 ## 📸 Screenshots
-
-(Add your screenshots here)
-
 - Dashboard
+- <img width="1891" height="896" alt="image" src="https://github.com/user-attachments/assets/989f3997-937a-42d9-b78a-744001b5ecb4" />
 - Prediction Result
+- <img width="1907" height="837" alt="image" src="https://github.com/user-attachments/assets/29e2f4c1-52ad-421a-a414-fd9c4c61facb" />
 - PDF Report
+- <img width="522" height="672" alt="image" src="https://github.com/user-attachments/assets/f0d7f02c-fd73-4b6d-9c07-008374b057e1" />
 - Reviews Page
+- <img width="1558" height="797" alt="image" src="https://github.com/user-attachments/assets/20d04a78-f0b4-4048-be5c-0140eef95ea9" />
 
 ## ⚙️ Installation
 
