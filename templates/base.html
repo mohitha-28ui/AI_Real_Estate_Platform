@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Real Estate Analytics{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Background Elements for Visual Depth -->
+    <div class="bg-glow-1"></div>
+    <div class="bg-glow-2"></div>
+
+    <!-- Navigation Header -->
+    <header class="navbar-container">
+        <div class="navbar-wrapper">
+            <a href="/" class="nav-brand">
+                <i class="fa-solid fa-hotel logo-icon"></i>
+                <span>Estate<span class="brand-accent">AI</span></span>
+            </a>
+            
+            <nav class="nav-menu">
+                {% if session.get('user') %}
+                    <a href="/dashboard" class="nav-link {% if active_page == 'dashboard' %}active{% endif %}">
+                        <i class="fa-solid fa-chart-line"></i> Dashboard
+                    </a>
+                    <a href="/predict" class="nav-link {% if active_page == 'predict' %}active{% endif %}">
+                        <i class="fa-solid fa-calculator"></i> Predict Price
+                    </a>
+                    <a href="/history" class="nav-link {% if active_page == 'history' %}active{% endif %}">
+                        <i class="fa-solid fa-history"></i> History
+                    </a>
+                {% endif %}
+            </nav>
+
+            <div class="nav-actions">
+                <!-- Theme Toggler -->
+                <button id="theme-toggle" class="btn-icon" aria-label="Toggle Theme">
+                    <i class="fa-solid fa-sun icon-light"></i>
+                    <i class="fa-solid fa-moon icon-dark"></i>
+                </button>
+
+                {% if session.get('user') %}
+                    <div class="user-profile">
+                        <div class="user-avatar">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                        <div class="user-info-dropdown">
+                            <span class="user-email">{{ session['user'] }}</span>
+                            <hr class="dropdown-divider">
+                            <a href="/logout" class="dropdown-item logout-link">
+                                <i class="fa-solid fa-right-from-bracket"></i> Log Out
+                            </a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="auth-buttons">
+                        <a href="/login" class="btn btn-outline">Login</a>
+                        <a href="/register" class="btn btn-primary">Sign Up</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        <!-- Toast Alerts -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="toast-container">
+                    {% for category, message in messages %}
+                        <div class="toast toast-{{ category }}">
+                            <div class="toast-content">
+                                <i class="fa-solid {% if category == 'success' %}fa-circle-check{% elif category == 'danger' %}fa-circle-exclamation{% else %}fa-circle-info{% endif %} toast-icon"></i>
+                                <span class="toast-message">{{ message }}</span>
+                            </div>
+                            <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-container">
+        <p>&copy; 2026 EstateAI Platform. All rights reserved. Powered by Machine Learning & MongoDB.</p>
+    </footer>
+
+    <!-- Main Javascript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

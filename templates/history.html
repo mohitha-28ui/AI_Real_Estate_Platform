@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction History - EstateAI{% endblock %}
+
+{% block content %}
+<div class="glass-card">
+    <div class="glass-card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1.25rem;">
+        <div>
+            <h1 class="glass-card-title"><i class="fa-solid fa-history logo-icon"></i> Valuation Log</h1>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">Review and export all previously calculated property predictions.</p>
+        </div>
+        <a href="/predict" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> New Prediction
+        </a>
+    </div>
+
+    {% if history %}
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Date / Time</th>
+                        <th>Location</th>
+                        <th>Square Feet</th>
+                        <th>Bed / Bath</th>
+                        <th>Year</th>
+                        <th>Garage</th>
+                        <th>Valuation</th>
+                        <th>Tier</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                        <tr>
+                            <td style="font-size: 0.85rem; color: var(--text-secondary);">
+                                {{ item.timestamp }}
+                            </td>
+                            <td><strong>{{ item.Location }}</strong></td>
+                            <td>{{ "{:,}".format(item.SquareFootage) }} sqft</td>
+                            <td>{{ item.Bedrooms }} / {{ item.Bathrooms }}</td>
+                            <td>{{ item.YearBuilt }}</td>
+                            <td>
+                                {% if item.HasGarage == 1 %}
+                                    <span style="color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> Yes</span>
+                                {% else %}
+                                    <span style="color: var(--text-muted);"><i class="fa-solid fa-circle-xmark"></i> No</span>
+                                {% endif %}
+                            </td>
+                            <td style="font-family: var(--font-heading); font-weight: 700; color: var(--color-accent);">
+                                ${{ "{:,.2f}".format(item.predicted_price) }}
+                            </td>
+                            <td>
+                                {% if item.is_expensive == 1 %}
+                                    <span class="badge badge-expensive" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Premium</span>
+                                {% else %}
+                                    <span class="badge badge-normal" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Standard</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/prediction/{{ item._id or item.id }}/pdf" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: var(--border-radius-sm);">
+                                    <i class="fa-solid fa-file-pdf" style="color: var(--color-danger);"></i> PDF
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 4rem 2rem; color: var(--text-secondary);">
+            <i class="fa-solid fa-folder-open" style="font-size: 3rem; opacity: 0.3; margin-bottom: 1rem;"></i>
+            <h3>No predictions found</h3>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">You haven't run any valuations yet. Head over to the calculator and execute your first prediction!</p>
+            <a href="/predict" class="btn btn-primary" style="margin-top: 1.5rem;">Get Started</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

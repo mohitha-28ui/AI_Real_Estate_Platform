@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Register - EstateAI{% endblock %}
+
+{% block content %}
+<div class="auth-container glass-card">
+    <div class="auth-header">
+        <h1>Create Account</h1>
+        <p>Start predicting and managing property prices</p>
+    </div>
+
+    <form action="/register" method="POST">
+        <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <div class="input-group">
+                <span class="input-icon"><i class="fa-solid fa-envelope"></i></span>
+                <input type="email" id="email" name="email" class="form-control form-control-icon" placeholder="name@example.com" required autocomplete="email">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <div class="input-group">
+                <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
+                <input type="password" id="password" name="password" class="form-control form-control-icon" placeholder="Create password" required autocomplete="new-password">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            <div class="input-group">
+                <span class="input-icon"><i class="fa-solid fa-shield-halved"></i></span>
+                <input type="password" id="confirm_password" name="confirm_password" class="form-control form-control-icon" placeholder="Confirm password" required autocomplete="new-password">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">
+            <i class="fa-solid fa-user-plus"></i> Create Account
+        </button>
+    </form>
+
+    <div class="auth-footer">
+        <p>Already have an account? <a href="/login">Login</a></p>
+    </div>
+</div>
+{% endblock %}

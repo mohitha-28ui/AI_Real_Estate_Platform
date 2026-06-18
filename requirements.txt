@@ -1,0 +1,8 @@
+flask
+pymongo
+scikit-learn
+pandas
+numpy
+joblib
+reportlab
+bcrypt

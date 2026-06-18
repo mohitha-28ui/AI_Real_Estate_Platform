@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - EstateAI{% endblock %}
+
+{% block extra_head %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="glass-card-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 1.25rem; margin-bottom: 2rem;">
+    <div>
+        <h1 class="glass-card-title"><i class="fa-solid fa-chart-line logo-icon"></i> Executive Dashboard</h1>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">Market intelligence, database metrics, and predictive insights.</p>
+    </div>
+    <a href="/predict" class="btn btn-primary">
+        <i class="fa-solid fa-calculator"></i> Run Valuation
+    </a>
+</div>
+
+<!-- Metrics Row -->
+<div class="dashboard-grid">
+    <div class="glass-card metrics-card">
+        <div class="metrics-icon">
+            <i class="fa-solid fa-database"></i>
+        </div>
+        <div class="metrics-info">
+            <h3>Total Predictions</h3>
+            <p id="metric-total">{{ stats.total_predictions }}</p>
+        </div>
+    </div>
+    
+    <div class="glass-card metrics-card">
+        <div class="metrics-icon">
+            <i class="fa-solid fa-tags"></i>
+        </div>
+        <div class="metrics-info">
+            <h3>Average Valuation</h3>
+            <p id="metric-avg">${{ "{:,.2f}".format(stats.avg_price) if stats.avg_price else "0.00" }}</p>
+        </div>
+    </div>
+    
+    <div class="glass-card metrics-card">
+        <div class="metrics-icon">
+            <i class="fa-solid fa-gem"></i>
+        </div>
+        <div class="metrics-info">
+            <h3>Premium Ratio</h3>
+            <p id="metric-premium">{{ "{:.1f}%".format(stats.premium_percentage) if stats.premium_percentage else "0.0%" }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Grid -->
+<div class="charts-grid">
+    <div class="glass-card chart-card">
+        <h3 style="font-family: var(--font-heading); margin-bottom: 1rem; font-size: 1.1rem;"><i class="fa-solid fa-chart-simple" style="color: var(--color-primary);"></i> Average Price by Location Type</h3>
+        <div class="chart-wrapper">
+            <canvas id="locationPriceChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="glass-card chart-card">
+        <h3 style="font-family: var(--font-heading); margin-bottom: 1rem; font-size: 1.1rem;"><i class="fa-solid fa-chart-pie" style="color: var(--color-accent);"></i> Predictions by Neighborhood</h3>
+        <div class="chart-wrapper">
+            <canvas id="locationDistributionChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Predictions Table -->
+<div class="glass-card">
+    <div class="glass-card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-family: var(--font-heading); font-size: 1.2rem; font-weight: 700;">Recent Predictions</h3>
+        <a href="/history" style="font-size: 0.85rem; color: var(--color-primary); font-weight: 600;">View All History <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    {% if recent_predictions %}
+        <div class="table-container">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Square Feet</th>
+                        <th>Beds/Baths</th>
+                        <th>Year</th>
+                        <th>Garage</th>
+                        <th>Predicted Price</th>
+                        <th>Tier</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in recent_predictions %}
+                        <tr>
+                            <td><strong>{{ item.Location }}</strong></td>
+                            <td>{{ "{:,}".format(item.SquareFootage) }} sqft</td>
+                            <td>{{ item.Bedrooms }} / {{ item.Bathrooms }}</td>
+                            <td>{{ item.YearBuilt }}</td>
+                            <td>
+                                {% if item.HasGarage == 1 %}
+                                    <span style="color: var(--color-success);"><i class="fa-solid fa-circle-check"></i> Yes</span>
+                                {% else %}
+                                    <span style="color: var(--text-muted);"><i class="fa-solid fa-circle-xmark"></i> No</span>
+                                {% endif %}
+                            </td>
+                            <td style="font-family: var(--font-heading); font-weight: 700; color: var(--color-accent);">
+                                ${{ "{:,.2f}".format(item.predicted_price) }}
+                            </td>
+                            <td>
+                                {% if item.is_expensive == 1 %}
+                                    <span class="badge badge-expensive" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Premium</span>
+                                {% else %}
+                                    <span class="badge badge-normal" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Standard</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/prediction/{{ item._id or item.id }}/pdf" class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: var(--border-radius-sm);">
+                                    <i class="fa-solid fa-file-pdf" style="color: var(--color-danger);"></i> PDF
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 2rem; color: var(--text-secondary); font-size: 0.9rem;">
+            No predictions logged yet. Run a valuation above to see them here!
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Retrieve chart data from flask context
+    const chartData = {{ chart_data|tojson }};
+    
+    // Theme colors & settings helper
+    const isDark = document.documentElement.getAttribute("data-theme") !== "light";
+    const textThemeColor = isDark ? "#94a3b8" : "#475569";
+    const gridThemeColor = isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(15, 23, 42, 0.06)";
+
+    // 1. Average Price by Location Type Chart
+    const ctxPrice = document.getElementById('locationPriceChart').getContext('2d');
+    const locationPriceChart = new Chart(ctxPrice, {
+        type: 'bar',
+        data: {
+            labels: chartData.price_by_location.labels,
+            datasets: [{
+                label: 'Avg Valuation ($)',
+                data: chartData.price_by_location.values,
+                backgroundColor: [
+                    'rgba(99, 102, 241, 0.75)',  // Indigo
+                    'rgba(20, 184, 166, 0.75)',  // Teal
+                    'rgba(245, 158, 11, 0.75)'   // Amber
+                ],
+                borderColor: [
+                    '#6366f1',
+                    '#14b8a6',
+                    '#f59e0b'
+                ],
+                borderWidth: 1.5,
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: isDark ? '#0c0f22' : '#ffffff',
+                    titleColor: isDark ? '#ffffff' : '#0f172a',
+                    bodyColor: isDark ? '#f8fafc' : '#475569',
+                    borderColor: 'rgba(99, 102, 241, 0.2)',
+                    borderWidth: 1,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return 'Avg Price: $' + context.raw.toLocaleString();
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: { color: textThemeColor }
+                },
+                y: {
+                    grid: { color: gridThemeColor },
+                    ticks: {
+                        color: textThemeColor,
+                        callback: function(value) {
+                            return '$' + (value / 1000) + 'k';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 2. Predictions by Neighborhood Chart (Doughnut)
+    const ctxDist = document.getElementById('locationDistributionChart').getContext('2d');
+    const locationDistributionChart = new Chart(ctxDist, {
+        type: 'doughnut',
+        data: {
+            labels: chartData.distribution.labels,
+            datasets: [{
+                data: chartData.distribution.values,
+                backgroundColor: [
+                    'rgba(99, 102, 241, 0.75)',
+                    'rgba(20, 184, 166, 0.75)',
+                    'rgba(245, 158, 11, 0.75)'
+                ],
+                borderColor: isDark ? '#0c0f22' : '#ffffff',
+                borderWidth: 2,
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: textThemeColor,
+                        padding: 15,
+                        font: { size: 12 }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: isDark ? '#0c0f22' : '#ffffff',
+                    titleColor: isDark ? '#ffffff' : '#0f172a',
+                    bodyColor: isDark ? '#f8fafc' : '#475569',
+                    borderColor: 'rgba(20, 184, 166, 0.2)',
+                    borderWidth: 1
+                }
+            },
+            cutout: '65%'
+        }
+    });
+});
+</script>
+{% endblock %}

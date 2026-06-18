@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Predict Price - EstateAI{% endblock %}
+
+{% block content %}
+<div class="glass-card-header" style="margin-bottom: 2rem;">
+    <h1 class="glass-card-title"><i class="fa-solid fa-calculator logo-icon"></i> House Price Estimator</h1>
+    <p style="color: var(--text-secondary); margin-top: 0.25rem;">Enter property parameters below to get instant AI-powered price valuations and classification reports.</p>
+</div>
+
+<div class="predict-layout">
+    <!-- Input Form -->
+    <div class="glass-card">
+        <form id="predict-form">
+            <div class="form-group">
+                <label for="square_footage" class="form-label">Square Footage (sqft)</label>
+                <div class="input-group">
+                    <span class="input-icon"><i class="fa-solid fa-ruler-combined"></i></span>
+                    <input type="number" id="square_footage" name="SquareFootage" class="form-control form-control-icon" min="400" max="10000" placeholder="e.g. 1800" required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="bedrooms" class="form-label">Bedrooms</label>
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fa-solid fa-bed"></i></span>
+                        <select id="bedrooms" name="Bedrooms" class="form-control form-control-icon" required>
+                            <option value="1">1 Bedroom</option>
+                            <option value="2">2 Bedrooms</option>
+                            <option value="3" selected>3 Bedrooms</option>
+                            <option value="4">4 Bedrooms</option>
+                            <option value="5">5+ Bedrooms</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="bathrooms" class="form-label">Bathrooms</label>
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fa-solid fa-bath"></i></span>
+                        <select id="bathrooms" name="Bathrooms" class="form-control form-control-icon" required>
+                            <option value="1">1 Bathroom</option>
+                            <option value="1.5">1.5 Bathrooms</option>
+                            <option value="2" selected>2 Bathrooms</option>
+                            <option value="2.5">2.5 Bathrooms</option>
+                            <option value="3">3 Bathrooms</option>
+                            <option value="4">4+ Bathrooms</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group">
+                    <label for="year_built" class="form-label">Year Built</label>
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                        <input type="number" id="year_built" name="YearBuilt" class="form-control form-control-icon" min="1800" max="2026" placeholder="e.g. 2005" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="has_garage" class="form-label">Garage Included</label>
+                    <div class="input-group">
+                        <span class="input-icon"><i class="fa-solid fa-warehouse"></i></span>
+                        <select id="has_garage" name="HasGarage" class="form-control form-control-icon" required>
+                            <option value="1" selected>Yes</option>
+                            <option value="0">No</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="location" class="form-label">Location (Neighborhood Type)</label>
+                <div class="input-group">
+                    <span class="input-icon"><i class="fa-solid fa-map-pin"></i></span>
+                    <select id="location" name="Location" class="form-control form-control-icon" required>
+                        <option value="Urban">Urban (High density)</option>
+                        <option value="Suburban" selected>Suburban (Residential)</option>
+                        <option value="Rural">Rural (Low density)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" style="margin-top: 1rem;">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Calculate AI Valuation
+            </button>
+        </form>
+    </div>
+
+    <!-- Output Section -->
+    <div class="glass-card result-card" id="result-card">
+        <div class="result-placeholder" id="result-placeholder">
+            <i class="fa-solid fa-robot"></i>
+            <h3>Awaiting Input Parameters</h3>
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">Fill in the property details and click "Calculate AI Valuation" to view the predicted pricing and model reports.</p>
+        </div>
+
+        <div class="result-display" id="result-display" style="display: none;">
+            <div>
+                <span class="badge" id="badge-classification">Classification</span>
+                <h3 style="color: var(--text-secondary); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; margin-top: 1rem;">Estimated Market Price</h3>
+                <div class="result-price" id="result-predicted-price">$0.00</div>
+                <p style="font-size: 0.9rem; color: var(--text-secondary); max-width: 80%; margin: 0 auto;" id="prediction-confidence-text">
+                    This estimation is derived using a Random Forest model trained on local real estate sales records.
+                </p>
+            </div>
+
+            <div class="result-specs">
+                <div class="spec-item">
+                    <div class="spec-label">Area (sqft)</div>
+                    <div class="spec-value" id="spec-sqft">-</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Beds / Baths</div>
+                    <div class="spec-value" id="spec-beds-baths">-</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Year Built</div>
+                    <div class="spec-value" id="spec-year">-</div>
+                </div>
+                <div class="spec-item">
+                    <div class="spec-label">Location / Garage</div>
+                    <div class="spec-value" id="spec-loc-garage">-</div>
+                </div>
+            </div>
+
+            <a id="btn-download-pdf" href="#" class="btn btn-accent btn-block">
+                <i class="fa-solid fa-file-pdf"></i> Download PDF Valuation Report
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('predict-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = {};
+    formData.forEach((value, key) => {
+        data[key] = value;
+    });
+
+    // Send prediction request
+    fetch('/predict', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(res => {
+        if (res.error) {
+            alert("Error: " + res.error);
+            return;
+        }
+
+        // Hide placeholder and show result
+        document.getElementById('result-placeholder').style.display = 'none';
+        document.getElementById('result-display').style.display = 'flex';
+
+        // Update elements
+        document.getElementById('result-predicted-price').innerText = '$' + Number(res.predicted_price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
+        const badge = document.getElementById('badge-classification');
+        if (res.is_expensive === 1) {
+            badge.innerText = 'Premium Tier (Expensive)';
+            badge.className = 'badge badge-expensive';
+        } else {
+            badge.innerText = 'Standard Tier (Affordable)';
+            badge.className = 'badge badge-normal';
+        }
+
+        // Update specs list
+        document.getElementById('spec-sqft').innerText = Number(data.SquareFootage).toLocaleString();
+        document.getElementById('spec-beds-baths').innerText = `${data.Bedrooms} Br / ${data.Bathrooms} Ba`;
+        document.getElementById('spec-year').innerText = data.YearBuilt;
+        document.getElementById('spec-loc-garage').innerText = `${data.Location} / ${data.HasGarage === '1' ? 'Yes' : 'No'}`;
+
+        // Update PDF button href
+        document.getElementById('btn-download-pdf').href = `/prediction/${res.prediction_id}/pdf`;
+    })
+    .catch(err => {
+        console.error("Error during prediction:", err);
+        alert("An error occurred. Make sure models are trained and Flask is running.");
+    });
+});
+</script>
+{% endblock %}
